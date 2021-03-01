@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use App\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -38,12 +39,19 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|confirmed|min:8',
         ]);
-
-        Auth::login($user = User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]));
+        ]);
+        // $owner = Role::create([
+        //     'name' => 'user',
+        //     'display_name' => 'Default Account Owner', // optional
+        //     'description' => 'User is the owner of a given Account', // optional
+        // ]);
+        $user->attachRole('user');
+
+        Auth::login($user);
 
         event(new Registered($user));
 
